@@ -1,5 +1,4 @@
-import { NextResponse } from "next/server";
-import { admin } from "@/lib/firebase/admin"; // Only import Firebase Admin
+import { NextResponse } from "next/server"; // Only import Firebase Admin
 
 export async function GET(request) {
   try {
