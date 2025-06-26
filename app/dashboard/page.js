@@ -1,17 +1,5 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useAuth } from "@/context/AuthContext";
-import { db } from "@/lib/firebase";
-import {
-  collection,
-  addDoc,
-  getDocs,
-  deleteDoc,
-  doc,
-  updateDoc,
-  query,
-  where,
-} from "firebase/firestore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -24,7 +12,25 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Share2, Trash2, CheckCircle, Search, X } from "lucide-react";
+import {
+  Share2,
+  Trash2,
+  CheckCircle,
+  Search,
+  X,
+  Ticket,
+  Users,
+  Calendar,
+  Shield,
+  Plus,
+  LogOut,
+  Eye,
+  BarChart3,
+  TrendingUp,
+  Clock,
+  Award,
+  Copy,
+} from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,49 +42,28 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useToast } from "@/hooks/use-toast";
-import { Toaster } from "@/components/ui/toaster";
-import { Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
+import { db } from "@/lib/firebase";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
-export function ModeToggle() {
-  const { setTheme } = useTheme();
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon">
-          <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          <span className="sr-only">Toggle theme</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>
-          Light
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
-          Dark
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
-          System
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc,
+  updateDoc,
+  query,
+  where,
+} from "firebase/firestore";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "@/hooks/use-toast";
+import { Toaster } from "@/components/ui/toaster";
+import TicketCard from "@/components/TicketCard";
+import Footer from "@/components/Footer";
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
   const [tickets, setTickets] = useState([]);
+
   const [searchedTickets, setSearchedTickets] = useState([]);
-  const [searchId, setSearchId] = useState("");
   const [newTicket, setNewTicket] = useState({
     name: "",
     phone: "",
@@ -86,17 +71,30 @@ export default function Dashboard() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
-  const { toast } = useToast();
+  const [currentSearchInput, setCurrentSearchInput] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
-  const [currentSearchInput, setCurrentSearchInput] = useState(""); // Add this state
+  const [searchId, setSearchId] = useState("");
 
+  const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
   useEffect(() => {
     if (user) {
       fetchTickets();
     }
   }, [user]);
+
+  const generateTicketId = () => {
+    return "TKT-" + Math.random().toString(36).slice(2, 7).toUpperCase();
+  };
 
   const fetchTickets = async () => {
     try {
@@ -110,10 +108,6 @@ export default function Dashboard() {
       console.error("Error fetching tickets:", error);
       // Optionally set an error state or show a user-friendly message
     }
-  };
-
-  const generateTicketId = () => {
-    return "TKT-" + Math.random().toString(36).slice(2, 7).toUpperCase();
   };
 
   const createTicket = async (e) => {
@@ -146,7 +140,6 @@ export default function Dashboard() {
       setIsLoading(false);
     }
   };
-
   const validateTicket = async (id) => {
     try {
       const ticketRef = doc(db, "tickets", id);
@@ -224,33 +217,6 @@ export default function Dashboard() {
     }
   };
 
-  const shareTicket = async (ticket) => {
-    const shareData = {
-      title: `${ticket.event} Ticket`,
-      text: `Hey ${ticket.name}, Check out your ticket for ${ticket.event}!`,
-      url: `${window.location.origin}/ticket/${ticket.ticketId}`,
-    };
-
-    try {
-      await navigator.share(shareData);
-    } catch (error) {
-      console.error("Error sharing:", error);
-    }
-  };
-    const formatSearchInput = (input) => {
-      // Remove TKT- if it exists and clean the input
-      const cleanInput = input.replace(/^TKT-/, "").toUpperCase();
-      // Only append TKT- if there's actual input
-      return cleanInput ? `TKT-${cleanInput}` : cleanInput;
-    };
-
-     const handleSearchInputChange = (e) => {
-       const inputValue = e.target.value;
-       // Remove TKT- prefix for display in input
-       const displayValue = inputValue.replace(/^TKT-/, "");
-       setCurrentSearchInput(displayValue);
-     };
-
   const searchTicket = async (searchValue) => {
     if (!searchValue) return;
     setError(null);
@@ -276,78 +242,29 @@ export default function Dashboard() {
     }
   };
 
- const handleSearch = () => {
-   if (!currentSearchInput.trim()) return;
-   const formattedSearch = formatSearchInput(currentSearchInput);
-   setSearchId(formattedSearch);
-   searchTicket(formattedSearch);
- };
+  const formatSearchInput = (input) => {
+    // Remove TKT- if it exists and clean the input
+    const cleanInput = input.replace(/^TKT-/, "").toUpperCase();
+    // Only append TKT- if there's actual input
+    return cleanInput ? `TKT-${cleanInput}` : cleanInput;
+  };
+
+  const handleSearchInputChange = (e) => {
+    const inputValue = e.target.value;
+    // Remove TKT- prefix for display in input
+    const displayValue = inputValue.replace(/^TKT-/, "");
+    setCurrentSearchInput(displayValue);
+  };
+  const handleSearch = () => {
+    if (!currentSearchInput.trim()) return;
+    const formattedSearch = formatSearchInput(currentSearchInput);
+    setSearchId(formattedSearch);
+    searchTicket(formattedSearch);
+  };
 
   const clearSearch = () => {
     setCurrentSearchInput(""); // Only clear the input field
   };
-
-  const verifiedCount = tickets.filter((ticket) => ticket.validated).length;
-  const unverifiedCount = tickets.filter((ticket) => !ticket.validated).length;
-
-const DeleteAllDialog = () => (
-  <AlertDialog>
-    <AlertDialogTrigger asChild>
-      <Button variant="destructive">
-        Delete All
-        <Trash2 className="h-4 w-4 ml-2" />
-      </Button>
-    </AlertDialogTrigger>
-    <AlertDialogContent className="sm:max-w-[425px]">
-      <AlertDialogHeader>
-        <AlertDialogTitle className="text-lg font-semibold">
-          Are you absolutely sure?
-        </AlertDialogTitle>
-        <AlertDialogDescription className="text-sm text-gray-500 dark:text-gray-400">
-          This action cannot be undone. This will permanently delete all tickets
-          from the database.
-        </AlertDialogDescription>
-      </AlertDialogHeader>
-      <AlertDialogFooter className="flex gap-2">
-        <AlertDialogCancel className="mt-0">Cancel</AlertDialogCancel>
-        <AlertDialogAction
-          onClick={clearAllTickets}
-          className="bg-red-600 hover:bg-red-700 text-white focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-        >
-          Delete All
-        </AlertDialogAction>
-      </AlertDialogFooter>
-    </AlertDialogContent>
-  </AlertDialog>
-);
-
-  const DeleteSingleDialog = ({ ticket }) => (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button size="sm" variant="destructive">
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Delete Ticket</AlertDialogTitle>
-          <AlertDialogDescription>
-            Are you sure you want to delete ticket {ticket.ticketId}? This
-            action cannot be undone.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={() => deleteTicket(ticket.id)}
-            className="bg-red-600 hover:bg-red-700"
-          >
-            Delete
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  );
 
   const copyToClipboard = async (text) => {
     try {
@@ -366,7 +283,20 @@ const DeleteAllDialog = () => (
     }
   };
 
-  // Add toast for login
+  const shareTicket = async (ticket) => {
+    const shareData = {
+      title: `${ticket.event} Ticket`,
+      text: `Hey ${ticket.name}, Check out your ticket for ${ticket.event}!`,
+      url: `${window.location.origin}/ticket/${ticket.ticketId}`,
+    };
+
+    try {
+      await navigator.share(shareData);
+    } catch (error) {
+      console.error("Error sharing:", error);
+    }
+  };
+
   useEffect(() => {
     if (user) {
       toast({
@@ -377,385 +307,583 @@ const DeleteAllDialog = () => (
     }
   }, [user, toast]);
 
-  const TicketCard = ({ ticket, showValidateButton = true }) => (
-    <Card className="mb-4">
-      <CardContent className="pt-6">
-        <div className="flex justify-between items-start mb-4">
-          <div>
-            <h3 className="font-semibold text-lg mb-1">{ticket.event}</h3>
-            <p className="text-sm text-gray-500 mb-2">{ticket.name}</p>
-          </div>
-          <div className="flex flex-col items-end">
-            {ticket.validated ? (
-              <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                Verified
-              </span>
-            ) : (
-              <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">
-                Pending
-              </span>
-            )}
-          </div>
-        </div>
+  const verifiedCount = tickets.filter((ticket) => ticket.validated).length;
+  const unverifiedCount = tickets.filter((ticket) => !ticket.validated).length;
+  const todayCount = tickets.filter((ticket) => {
+    const today = new Date().toDateString();
+    const ticketDate = new Date(ticket.createdAt).toDateString();
+    return today === ticketDate;
+  }).length;
 
-        <div className="space-y-2 mb-4">
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-gray-500">Ticket ID:</span>
-            <span
-              className="font-mono text-blue-600 cursor-pointer"
-              onClick={() => copyToClipboard(ticket.ticketId)}
-            >
-              {ticket.ticketId}
-            </span>
-          </div>
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-gray-500">Phone:</span>
-            <span>{ticket.phone}</span>
-          </div>
-        </div>
-
-        <div className="flex gap-2 justify-end border-t pt-4">
-          {!ticket.validated && showValidateButton && (
-            <Button
-              size="sm"
-              onClick={() => validateTicket(ticket.id)}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              <CheckCircle className="h-4 w-4 mr-2" />
-              Validate
-            </Button>
-          )}
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => shareTicket(ticket)}
-          >
-            <Share2 className="h-4 w-4 mr-2" />
-            Share
-          </Button>
-          <DeleteSingleDialog ticket={ticket} />
-        </div>
-      </CardContent>
-    </Card>
-  );
+  const stats = [
+    {
+      icon: Ticket,
+      value: tickets.length.toString(),
+      label: "Total Tickets",
+      color: "from-blue-500 to-cyan-500",
+    },
+    {
+      icon: CheckCircle,
+      value: verifiedCount.toString(),
+      label: "Verified",
+      color: "from-green-500 to-emerald-500",
+    },
+    {
+      icon: Clock,
+      value: unverifiedCount.toString(),
+      label: "Pending",
+      color: "from-yellow-500 to-orange-500",
+    },
+    {
+      icon: Calendar,
+      value: todayCount.toString(),
+      label: "Today",
+      color: "from-purple-500 to-pink-500",
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-8 dark:bg-gray-900">
-      <div className="max-w-6xl mx-auto space-y-4 sm:space-y-8">
-        <div className="flex flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
-          <h1 className="text-2xl sm:text-3xl font-bold">Ticket Management</h1>
-          <div className="flex items-center gap-2">
-            <ModeToggle />
-            <Button onClick={logout} variant="outline">
+    <>
+      <div
+        className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white relative overflow-hidden"
+        style={{
+          background: `radial-gradient(600px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(59, 130, 246, 0.08), transparent 40%), linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0f172a 100%)`,
+        }}
+      >
+        {/* Animated background elements */}
+        {/* <div className="absolute inset-0">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
+      </div> */}
+
+        {/* Navigation */}
+        <nav className="relative z-50 backdrop-blur-md bg-black/20 border-b border-white/10">
+          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                <Ticket className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <span className="text-xl font-bold text-white">
+                  Eventra
+                </span>
+                <span className="block text-sm text-gray-400">Dashboard</span>
+              </div>
+            </div>
+            <Button
+              className="bg-white/10 hover:bg-white/20 text-white border border-white/20"
+              variant="outline"
+              onClick={logout}
+            >
+              <LogOut className="w-4 h-4 mr-2" />
               Logout
             </Button>
           </div>
-        </div>
+        </nav>
 
-        <Tabs defaultValue="create">
-          <TabsList className="w-full flex">
-            <TabsTrigger value="create" className="flex-1">
-              Create
-            </TabsTrigger>
-            <TabsTrigger value="manage" className="flex-1">
-              Manage
-            </TabsTrigger>
-            <TabsTrigger value="search" className="flex-1">
-              Search
-            </TabsTrigger>
-          </TabsList>
+        <div className="relative z-10 max-w-7xl mx-auto p-4 sm:p-8 space-y-8">
+          {/* Welcome Section */}
+          <div className="text-center space-y-4 mt-8">
+            <h1 className="text-4xl md:text-5xl font-bold">
+              <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                Dashboard
+              </span>
+            </h1>
+            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+              Manage your events, track ticket sales, and monitor performance in
+              real-time.
+            </p>
+          </div>
 
-          <TabsContent value="create">
-            <Card className="sm:max-w-[500px]">
-              <CardHeader>
-                <CardTitle>Create New Ticket</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={createTicket} className="space-y-4">
-                  <Input
-                    placeholder="Name"
-                    value={newTicket.name}
-                    onChange={(e) =>
-                      setNewTicket({ ...newTicket, name: e.target.value })
-                    }
-                    required
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            {stats.map((stat, index) => (
+              <div key={index} className="group cursor-pointer">
+                <div className="relative p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/15 transition-all duration-300 group-hover:scale-105 overflow-hidden">
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
                   />
-                  <Input
-                    type="tel"
-                    placeholder="Phone Number"
-                    value={newTicket.phone}
-                    onChange={(e) =>
-                      setNewTicket({ ...newTicket, phone: e.target.value })
-                    }
-                    required
-                  />
-                  <Input
-                    placeholder="Event Name"
-                    value={newTicket.event}
-                    onChange={(e) =>
-                      setNewTicket({ ...newTicket, event: e.target.value })
-                    }
-                    required
-                  />
-                  <Button type="submit" disabled={isLoading}>
-                    {isLoading ? "Generating..." : "Generate Ticket"}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </TabsContent>
 
-          <TabsContent value="manage">
-            <div className="flex flex-col sm:hidden mb-4">
-              <Card className="mb-4">
-                <CardContent className="pt-6">
-                  <div className="grid grid-cols-3 gap-2 text-center">
-                    <div className="bg-white rounded-lg p-3 border">
-                      <p className="text-sm text-gray-500">Total</p>
-                      <p className="text-xl font-semibold dark:text-black">
-                        {tickets.length}
-                      </p>
+                  <div className="relative z-10 space-y-3">
+                    <div
+                      className={`p-3 bg-gradient-to-r ${stat.color} rounded-xl w-fit`}
+                    >
+                      <stat.icon className="w-6 h-6 text-white" />
                     </div>
-                    <div className="bg-white rounded-lg p-3 border">
-                      <p className="text-sm text-gray-500">Verified</p>
-                      <p className="text-xl font-semibold text-green-600">
-                        {verifiedCount}
-                      </p>
-                    </div>
-                    <div className="bg-white rounded-lg p-3 border">
-                      <p className="text-sm text-gray-500">Pending</p>
-                      <p className="text-xl font-semibold text-yellow-600">
-                        {unverifiedCount}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              <DeleteAllDialog />
-            </div>
-
-            {/* Mobile view with cards */}
-            <div className="sm:hidden space-y-4">
-              {tickets.map((ticket) => (
-                <TicketCard key={ticket.id} ticket={ticket} />
-              ))}
-            </div>
-            <div className="hidden sm:block">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle>All Tickets({tickets.length})</CardTitle>
-                  <CardTitle>Verified Tickets({verifiedCount})</CardTitle>
-                  <CardTitle>Unverified Tickets({unverifiedCount})</CardTitle>
-                  <DeleteAllDialog />
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Ticket ID</TableHead>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Phone Number</TableHead>
-                        <TableHead>Event</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {tickets.map((ticket) => (
-                        <TableRow key={ticket.id}>
-                          <TableCell
-                            onClick={() => copyToClipboard(ticket.ticketId)}
-                            className="cursor-pointer hover:text-blue-600 transition-colors"
-                            title="Click to copy"
-                          >
-                            {ticket.ticketId}
-                          </TableCell>
-                          <TableCell>{ticket.name}</TableCell>
-                          <TableCell>{ticket.phone}</TableCell>
-                          <TableCell>{ticket.event}</TableCell>
-                          <TableCell>
-                            {ticket.validated ? (
-                              <span className="text-green-600">Verified</span>
-                            ) : (
-                              <span className="text-yellow-600">Pending</span>
-                            )}
-                          </TableCell>
-                          <TableCell className="space-x-2">
-                            {!ticket.validated && (
-                              <Button
-                                size="sm"
-                                onClick={() => validateTicket(ticket.id)}
-                                className="mr-2"
-                              >
-                                <CheckCircle className="h-4 w-4" />
-                              </Button>
-                            )}
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => shareTicket(ticket)}
-                              className="mr-2"
-                            >
-                              <Share2 className="h-4 w-4" />
-                            </Button>
-                            <DeleteSingleDialog ticket={ticket} />
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-          <TabsContent value="search">
-            <Card className="sm:max-w-[500px]">
-              <CardHeader>
-                <CardTitle>Search Ticket</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex space-x-2">
-                  <div className="relative flex-1">
-                    <div className="relative">
-                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
-                        TKT-
+                    <div>
+                      <div className="text-2xl font-bold text-white">
+                        {stat.value}
                       </div>
-                      <Input
-                        placeholder="Enter Ticket ID"
-                        value={currentSearchInput}
-                        onChange={handleSearchInputChange}
-                        onKeyPress={(e) => {
-                          if (e.key === "Enter") {
-                            handleSearch();
-                          }
-                        }}
-                        className="pl-12 pr-8 uppercase"
-                      />
-                      {currentSearchInput && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0"
-                          onClick={() => setCurrentSearchInput("")}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      )}
+                      <div className="text-gray-400 text-sm">{stat.label}</div>
                     </div>
                   </div>
-                  <Button
-                    onClick={handleSearch}
-                    disabled={isSearching || !currentSearchInput.trim()}
-                  >
-                    <Search className="h-4 w-4 mr-2" />
-                    {isSearching ? "Searching..." : "Search"}
-                  </Button>
                 </div>
-              </CardContent>
-            </Card>
-
-            {isSearching && (
-              <div className="flex justify-center items-center mt-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
               </div>
-            )}
+            ))}
+          </div>
 
-            {hasSearched && !isSearching && searchedTickets.length === 0 && (
-              <Card className="mt-4">
-                <CardContent className="flex flex-col items-center justify-center py-8">
-                  <div className="text-center space-y-2">
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      No Results Found
-                    </h3>
-                    <p className="text-sm text-gray-500">
-                      No ticket found with ID: {searchId}
-                    </p>
+          {/* Main Content */}
+          <div className="backdrop-blur-sm bg-white/5 rounded-3xl border border-white/10 overflow-hidden">
+            <Tabs defaultValue="create" className="w-full">
+              <div className="border-b border-white/10 bg-white/5">
+                <TabsList className="w-full bg-transparent h-16 p-1">
+                  <TabsTrigger
+                    value="create"
+                    className="flex-1 h-12 bg-transparent text-gray-300 data-[state=active]:bg-white/10 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-full transition-all duration-200"
+                  >
+                    <Plus className="w-4 h-4 mr-2 hidden sm:block" />
+                    Create Ticket
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="manage"
+                    className="flex-1 h-12 bg-transparent text-gray-300 data-[state=active]:bg-white/10 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-full transition-all duration-200"
+                  >
+                    <BarChart3 className="w-4 h-4 mr-2 hidden sm:block" />
+                    Manage Tickets
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="search"
+                    className="flex-1 h-12 bg-transparent text-gray-300 data-[state=active]:bg-white/10 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-full transition-all duration-200"
+                  >
+                    <Search className="w-4 h-4 mr-2 hidden sm:block" />
+                    Search Tickets
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+
+              <div className="pt-6 md:p-8">
+                <TabsContent value="create" className="mt-0">
+                  <div className="max-w-2xl mx-auto">
+                    <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+                      <CardHeader className="text-center">
+                        <CardTitle className="text-2xl text-white flex items-center justify-center gap-2">
+                          <Plus className="w-6 h-6" />
+                          Create New Ticket
+                        </CardTitle>
+                        <p className="text-gray-300">
+                          Generate a new digital ticket for your event
+                        </p>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <form onSubmit={createTicket} className="space-y-6">
+                          <div className="space-y-4">
+                            <Input
+                              placeholder="Full Name"
+                              value={newTicket.name}
+                              onChange={(e) =>
+                                setNewTicket({
+                                  ...newTicket,
+                                  name: e.target.value,
+                                })
+                              }
+                              required
+                              className="bg-white/10 border-white/30 text-white placeholder:text-gray-400 focus:border-blue-500 h-12"
+                            />
+                            <Input
+                              type="tel"
+                              placeholder="Phone Number"
+                              value={newTicket.phone}
+                              onChange={(e) =>
+                                setNewTicket({
+                                  ...newTicket,
+                                  phone: e.target.value,
+                                })
+                              }
+                              required
+                              className="bg-white/10 border-white/30 text-white placeholder:text-gray-400 focus:border-blue-500 h-12"
+                            />
+                            <Input
+                              placeholder="Event Name"
+                              value={newTicket.event}
+                              onChange={(e) =>
+                                setNewTicket({
+                                  ...newTicket,
+                                  event: e.target.value,
+                                })
+                              }
+                              required
+                              className="bg-white/10 border-white/30 text-white placeholder:text-gray-400 focus:border-blue-500 h-12"
+                            />
+                          </div>
+                          <Button
+                            type="submit"
+                            disabled={isLoading}
+                            className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 h-12 transition-all duration-200 transform hover:scale-[1.02]"
+                          >
+                            {isLoading ? (
+                              <div className="flex items-center justify-center">
+                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                                Generating Ticket...
+                              </div>
+                            ) : (
+                              <>
+                                <Ticket className="w-4 h-4 mr-2" />
+                                Generate Ticket
+                              </>
+                            )}
+                          </Button>
+                        </form>
+                      </CardContent>
+                    </Card>
                   </div>
-                </CardContent>
-              </Card>
-            )}
-            <div className="hidden sm:block">
-              {searchedTickets.length > 0 && (
-                <Card className="mt-8">
-                  <CardContent>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Ticket ID</TableHead>
-                          <TableHead>Name</TableHead>
-                          <TableHead>Phone Number</TableHead>
-                          <TableHead>Event</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {searchedTickets.map((ticket) => (
-                          <TableRow key={ticket.id}>
-                            <TableCell
-                              onClick={() => copyToClipboard(ticket.ticketId)}
-                              className="cursor-pointer hover:text-blue-600 transition-colors"
-                              title="Click to copy"
+                </TabsContent>
+
+                <TabsContent value="manage" className="mt-0">
+                  <div className="space-y-6">
+                    <div className="flex justify-between items-center px-5">
+                      <h2 className="text-2xl font-bold text-white">
+                        All Tickets
+                      </h2>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="destructive"
+                            disabled={tickets.length === 0}
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete All
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="bg-slate-900 border-white/20">
+                          <AlertDialogHeader>
+                            <AlertDialogTitle className="text-white">
+                              Are you absolutely sure?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription className="text-gray-300">
+                              This action cannot be undone. This will
+                              permanently delete all tickets from the database.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel className="border-white/30 text-white hover:bg-white/10">
+                              Cancel
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={clearAllTickets}
+                              className="bg-red-600 hover:bg-red-700"
                             >
-                              {ticket.ticketId}
-                            </TableCell>
-                            <TableCell>{ticket.name}</TableCell>
-                            <TableCell>{ticket.phone}</TableCell>
-                            <TableCell>{ticket.event}</TableCell>
-                            <TableCell>
-                              {ticket.validated ? (
-                                <span className="text-green-600">Verified</span>
-                              ) : (
-                                <span className="text-yellow-600">Pending</span>
-                              )}
-                            </TableCell>
-                            <TableCell className="space-x-2">
-                              {!ticket.validated && (
-                                <Button
-                                  size="sm"
-                                  onClick={() => validateTicket(ticket.id)}
-                                  className="mr-2"
-                                >
-                                  <CheckCircle className="h-4 w-4" />
-                                </Button>
-                              )}
+                              Delete All
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+
+                    {/* Empty State */}
+                    {tickets.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center py-16 px-4">
+                        <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/20 p-12 text-center max-w-md">
+                          <div className="w-16 h-16 mx-auto mb-6 bg-white/10 rounded-full flex items-center justify-center">
+                            <Ticket className="h-8 w-8 text-gray-400" />
+                          </div>
+                          <h3 className="text-xl font-semibold text-white mb-2">
+                            No Tickets Found
+                          </h3>
+                          <p className="text-gray-400 mb-6">
+                            There are no tickets in the system yet. Create your
+                            first ticket to get started.
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        {/* Mobile Cards */}
+                        <div className="md:hidden space-y-4">
+                          {tickets.map((ticket) => (
+                            <TicketCard
+                              key={ticket.id}
+                              ticket={ticket}
+                              onValidate={() => validateTicket(ticket.id)}
+                              onDelete={() => deleteTicket(ticket.id)}
+                              onShare={() => shareTicket(ticket)}
+                            />
+                          ))}
+                        </div>
+
+                        {/* Desktop Table */}
+                        <div className="hidden md:block">
+                          <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 overflow-hidden">
+                            <Table>
+                              <TableHeader>
+                                <TableRow className="border-white/20 hover:bg-white/5">
+                                  <TableHead className="text-gray-300 font-semibold">
+                                    Ticket ID
+                                  </TableHead>
+                                  <TableHead className="text-gray-300 font-semibold">
+                                    Name
+                                  </TableHead>
+                                  <TableHead className="text-gray-300 font-semibold">
+                                    Phone
+                                  </TableHead>
+                                  <TableHead className="text-gray-300 font-semibold">
+                                    Event
+                                  </TableHead>
+                                  <TableHead className="text-gray-300 font-semibold">
+                                    Status
+                                  </TableHead>
+                                  <TableHead className="text-gray-300 font-semibold">
+                                    Actions
+                                  </TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {tickets.map((ticket) => (
+                                  <TableRow
+                                    key={ticket.id}
+                                    className="border-white/10 hover:bg-white/5 transition-colors"
+                                  >
+                                    <TableCell
+                                      onClick={() =>
+                                        copyToClipboard(ticket.ticketId)
+                                      }
+                                      className="cursor-pointer hover:text-blue-300 transition-colors text-white font-mono"
+                                      title="Click to copy"
+                                    >
+                                      {ticket.ticketId}
+                                    </TableCell>
+                                    <TableCell className="text-white">
+                                      {ticket.name}
+                                    </TableCell>
+                                    <TableCell className="text-gray-300">
+                                      {ticket.phone}
+                                    </TableCell>
+                                    <TableCell className="text-white">
+                                      {ticket.event}
+                                    </TableCell>
+                                    <TableCell>
+                                      {ticket.validated ? (
+                                        <span className="bg-green-500/20 text-green-300 px-2 py-1 rounded-full text-xs border border-green-500/30">
+                                          Verified
+                                        </span>
+                                      ) : (
+                                        <span className="bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded-full text-xs border border-yellow-500/30">
+                                          Pending
+                                        </span>
+                                      )}
+                                    </TableCell>
+                                    <TableCell className="space-x-2">
+                                      {!ticket.validated && (
+                                        <Button
+                                          size="sm"
+                                          onClick={() =>
+                                            validateTicket(ticket.id)
+                                          }
+                                          className="bg-green-600/20 hover:bg-green-600/30 text-green-300 border border-green-500/30"
+                                        >
+                                          <CheckCircle className="h-4 w-4" />
+                                        </Button>
+                                      )}
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="border-white/30 text-white hover:bg-white/10"
+                                        onClick={() => shareTicket(ticket)}
+                                      >
+                                        <Share2 className="h-4 w-4" />
+                                      </Button>
+                                      <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                          <Button
+                                            size="sm"
+                                            className="bg-red-600/20 hover:bg-red-600/30 text-red-300 border border-red-500/30"
+                                          >
+                                            <Trash2 className="h-4 w-4" />
+                                          </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent className="bg-slate-900 border-white/20">
+                                          <AlertDialogHeader>
+                                            <AlertDialogTitle className="text-white">
+                                              Delete Ticket
+                                            </AlertDialogTitle>
+                                            <AlertDialogDescription className="text-gray-300">
+                                              Are you sure you want to delete
+                                              ticket {ticket.ticketId}?
+                                            </AlertDialogDescription>
+                                          </AlertDialogHeader>
+                                          <AlertDialogFooter>
+                                            <AlertDialogCancel className="border-white/30 text-white hover:bg-white/10">
+                                              Cancel
+                                            </AlertDialogCancel>
+                                            <AlertDialogAction
+                                              onClick={() =>
+                                                deleteTicket(ticket.id)
+                                              }
+                                              className="bg-red-600 hover:bg-red-700"
+                                            >
+                                              Delete
+                                            </AlertDialogAction>
+                                          </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                      </AlertDialog>
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="search" className="mt-0">
+                  <div className="max-w-2xl mx-auto space-y-6">
+                    <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+                      <CardHeader className="text-center">
+                        <CardTitle className="text-2xl text-white flex items-center justify-center gap-2">
+                          <Search className="w-6 h-6" />
+                          Search Ticket
+                        </CardTitle>
+                        <p className="text-gray-300">
+                          Find a specific ticket by its ID
+                        </p>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex space-x-3">
+                          <div className="relative flex-1">
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none font-mono">
+                              TKT-
+                            </div>
+                            <Input
+                              placeholder="Enter Ticket ID"
+                              value={currentSearchInput}
+                              onChange={(e) =>
+                                setCurrentSearchInput(
+                                  e.target.value
+                                    .replace(/^TKT-/, "")
+                                    .toUpperCase()
+                                )
+                              }
+                              onKeyPress={(e) =>
+                                e.key === "Enter" && handleSearch()
+                              }
+                              className="pl-16 pr-4 h-12 bg-white/10 border-white/30 text-white placeholder:text-gray-400 focus:border-blue-500 font-mono uppercase"
+                            />
+                            {currentSearchInput && (
                               <Button
+                                variant="ghost"
                                 size="sm"
-                                variant="outline"
-                                onClick={() => shareTicket(ticket)}
-                                className="mr-2"
+                                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 text-gray-400 hover:text-white"
+                                onClick={clearSearch}
                               >
-                                <Share2 className="h-4 w-4" />
+                                <X className="h-4 w-4" />
                               </Button>
-                              <DeleteSingleDialog ticket={ticket} />
-                            </TableCell>
-                          </TableRow>
+                            )}
+                          </div>
+                          <Button
+                            onClick={handleSearch}
+                            disabled={isSearching || !currentSearchInput.trim()}
+                            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 px-6 h-12"
+                          >
+                            {isSearching ? (
+                              <div className="flex items-center">
+                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                                Searching...
+                              </div>
+                            ) : (
+                              <>
+                                <Search className="h-4 w-4 mr-2" />
+                                Search
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Search Results */}
+                    {hasSearched &&
+                      !isSearching &&
+                      searchedTickets.length === 0 && (
+                        <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+                          <CardContent className="flex flex-col items-center justify-center py-12">
+                            <div className="w-16 h-16 bg-gray-600/20 rounded-full flex items-center justify-center mb-4">
+                              <Search className="w-8 h-8 text-gray-400" />
+                            </div>
+                            <h3 className="text-xl font-semibold text-white mb-2">
+                              No Tickets Found
+                            </h3>
+                            <p className="text-gray-400 text-center">
+                              No ticket found with ID: {searchId}
+                            </p>
+                          </CardContent>
+                        </Card>
+                      )}
+
+                    {/* Display Search Results */}
+                    {searchedTickets.length > 0 && (
+                      <div className="space-y-4">
+                        <h3 className="text-xl font-semibold text-white mb-4">
+                          Search Results
+                        </h3>
+                        {searchedTickets.map((ticket) => (
+                          <TicketCard
+                            key={ticket.id}
+                            ticket={ticket}
+                            showValidateButton={true}
+                            onValidate={() => validateTicket(ticket.id)}
+                            onShare={() => shareTicket(ticket)}
+                            onDelete={() => deleteTicket(ticket.id)}
+                          />
                         ))}
-                      </TableBody>
-                    </Table>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-            {/* Mobile view for search results */}
-            <div className="sm:hidden mt-4">
-              {searchedTickets.map((ticket) => (
-                <TicketCard key={ticket.id} ticket={ticket} />
-              ))}
-            </div>
-          </TabsContent>
-        </Tabs>
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+              </div>
+            </Tabs>
+          </div>
+
+          {/* Recent Activity */}
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Clock className="w-5 h-5" />
+                Recent Activity
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {tickets.slice(0, 3).map((ticket) => (
+                  <div
+                    key={ticket.id}
+                    className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                      <div>
+                        <p className="text-white text-sm">
+                          New ticket created for{" "}
+                          <span className="font-semibold">{ticket.name}</span>
+                        </p>
+                        <p className="text-gray-400 text-xs">
+                          {new Date(ticket.createdAt).toLocaleDateString()} at{" "}
+                          {new Date(ticket.createdAt).toLocaleTimeString()}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-xs text-gray-400 font-mono">
+                      {ticket.ticketId}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            duration: 3000,
+            style: {
+              background: "#363636",
+              color: "#fff",
+            },
+          }}
+        />
       </div>
-      <Toaster
-        position="top-center"
-        toastOptions={{
-          duration: 3000,
-          style: {
-            background: "#363636",
-            color: "#fff",
-          },
-        }}
-      />
-    </div>
+      <Footer />
+    </>
   );
 }

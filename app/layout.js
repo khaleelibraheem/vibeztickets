@@ -3,6 +3,7 @@ import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
+import Footer from "@/components/Footer";
 
 const outfit = Outfit({ subsets: ["latin"], weights: ["400", "700"] });
 
@@ -18,9 +19,7 @@ export default function RootLayout({ children }) {
         >
           <AuthProvider>{children}</AuthProvider>
           <Toaster />
-          <footer className="text-sm text-center">
-            &copy; 2024 Built by Khaleel Alhaji
-          </footer>
+          {/* <Footer /> */}
         </ThemeProvider>
       </body>
     </html>
