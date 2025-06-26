@@ -175,12 +175,12 @@ export default function TicketView() {
           <div className="absolute top-1/3 left-1/3 w-72 h-72 bg-blue-500/10 rounded-full blur-2xl animate-pulse" />
           <div className="absolute bottom-1/3 right-1/3 w-72 h-72 bg-purple-500/10 rounded-full blur-2xl animate-pulse delay-1000" />
         </div>
-        <div className="flex items-center justify-center space-x-2 mb-4">
+        {/* <div className="flex items-center justify-center space-x-2 mb-4">
           <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
             <Ticket className="w-5 h-5 text-white" />
           </div>
           <span className="text-xl font-bold text-white">Eventra</span>
-        </div>
+        </div> */}
         <div className="w-full max-w-md relative z-10 print:w-full mt-5 lg:mt-0">
           <div className="text-center mb-4 print:hidden">
             <span className="inline-block px-4 py-1 text-xs text-blue-300 bg-blue-500/10 rounded-full border border-blue-500/30 backdrop-blur-md">
@@ -289,19 +289,19 @@ export default function TicketView() {
                 <Button
                   onClick={handleShare}
                   size="sm"
-                  className="bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/30 backdrop-blur-sm transition-all"
+                  className="bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/30 backdrop-blur-sm transition-all print:hidden"
                 >
                   <Share2 className="h-4 w-4 mr-1" />
                   Share
                 </Button>
-                <Button
+                {/* <Button
                   onClick={handleDownloadImage}
                   size="sm"
-                  className="bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/30 backdrop-blur-sm transition-all"
+                  className="bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/30 backdrop-blur-sm transition-all print:hidden"
                 >
                   <Download className="h-4 w-4 mr-1" />
                   Download
-                </Button>
+                </Button> */}
               </div>
             </div>
           </Card>

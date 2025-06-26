@@ -5,7 +5,7 @@ export default function Footer() {
   return (
     <footer>
       <div className="text-center">
-        <div className="p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10">
+        <div className="p-6 bg-white/5 backdrop-blur-sm border border-white/10">
           <div className="flex items-center justify-center space-x-2 mb-2">
             <div className="w-1 h-1 bg-blue-400 rounded-full animate-pulse"></div>
             <div className="w-1 h-1 bg-purple-400 rounded-full animate-pulse delay-100"></div>

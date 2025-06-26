@@ -66,7 +66,6 @@
 .animate-in {
   animation: animate-in 0.5s ease-out;
 }
-
 @media print {
   body {
     background: white !important;

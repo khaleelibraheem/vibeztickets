@@ -129,9 +129,7 @@ export default function VibezFusionPlatform() {
             <CardTitle className="text-2xl font-bold text-white">
               Welcome Back
             </CardTitle>
-            <p className="text-gray-300">
-              Sign in to your Eventra dashboard
-            </p>
+            <p className="text-gray-300">Sign in to your Eventra dashboard</p>
           </CardHeader>
           <CardContent>
             {error && (
@@ -261,6 +259,7 @@ export default function VibezFusionPlatform() {
             <div className="flex flex-wrap items-center justify-center gap-6">
               <Button
                 size="lg"
+                onClick={() => setCurrentView("login")}
                 className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 px-8 py-4 text-lg font-semibold transform hover:scale-105 transition-all duration-200"
               >
                 Login to Dashboard

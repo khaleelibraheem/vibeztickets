@@ -168,8 +168,7 @@ const TicketCard = ({ ticket, showValidateButton = true, onDelete, onValidate, o
             )}
             <Button
               size="sm"
-              variant="outline"
-              className="border-white/30 text-white"
+              className="border-white/30 bg-white text-black"
               onClick={onShare}
             >
               <Share2 className="h-4 w-4 mr-2" />

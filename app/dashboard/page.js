@@ -364,9 +364,7 @@ export default function Dashboard() {
                 <Ticket className="w-6 h-6 text-white" />
               </div>
               <div>
-                <span className="text-xl font-bold text-white">
-                  Eventra
-                </span>
+                <span className="text-xl font-bold text-white">Eventra</span>
                 <span className="block text-sm text-gray-400">Dashboard</span>
               </div>
             </div>
@@ -477,7 +475,7 @@ export default function Dashboard() {
                                 })
                               }
                               required
-                              className="bg-white/10 border-white/30 text-white placeholder:text-gray-400 focus:border-blue-500 h-12"
+                              className="text-base bg-white/10 border-white/30 text-white placeholder:text-gray-400 focus:border-blue-500 h-12"
                             />
                             <Input
                               type="tel"
@@ -490,7 +488,7 @@ export default function Dashboard() {
                                 })
                               }
                               required
-                              className="bg-white/10 border-white/30 text-white placeholder:text-gray-400 focus:border-blue-500 h-12"
+                              className="text-base bg-white/10 border-white/30 text-white placeholder:text-gray-400 focus:border-blue-500 h-12"
                             />
                             <Input
                               placeholder="Event Name"
@@ -502,7 +500,7 @@ export default function Dashboard() {
                                 })
                               }
                               required
-                              className="bg-white/10 border-white/30 text-white placeholder:text-gray-400 focus:border-blue-500 h-12"
+                              className="text-base bg-white/10 border-white/30 text-white placeholder:text-gray-400 focus:border-blue-500 h-12"
                             />
                           </div>
                           <Button
