@@ -150,7 +150,7 @@ export default function VibezFusionPlatform() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="bg-white/5 border-white/20 text-white placeholder:text-gray-400 focus:border-blue-500 transition-colors"
+                  className="text-base bg-white/5 border-white/20 text-white placeholder:text-gray-400 focus:border-blue-500 transition-colors"
                   aria-label="Email"
                 />
               </div>
@@ -161,7 +161,7 @@ export default function VibezFusionPlatform() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="bg-white/5 border-white/20 text-white placeholder:text-gray-400 focus:border-blue-500 transition-colors pr-10"
+                  className="text-base bg-white/5 border-white/20 text-white placeholder:text-gray-400 focus:border-blue-500 transition-colors pr-10"
                   aria-label="Password"
                 />
                 <button
