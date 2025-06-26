@@ -67,8 +67,8 @@ export default function TicketView() {
   const handleShare = async () => {
     try {
       await navigator.share({
-        title: `Ticket for ${ticket?.event}`,
-        text: `Check out my ticket for ${ticket?.event}!`,
+        title: `Ticket for the RNTU ${ticket?.event}`,
+        text: `Check out my ticket for the RNTU ${ticket?.event}!`,
         url: window.location.href,
       });
     } catch (error) {
