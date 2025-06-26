@@ -196,7 +196,7 @@ const TicketCard = ({ ticket, showValidateButton = true, onDelete, onValidate, o
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel className="border-white/30 text-white">
+                  <AlertDialogCancel className="border-white/30 text-black bg-white">
                     Cancel
                   </AlertDialogCancel>
                   <AlertDialogAction

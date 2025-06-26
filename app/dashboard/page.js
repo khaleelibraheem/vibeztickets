@@ -553,7 +553,7 @@ export default function Dashboard() {
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel className="border-white/30 text-white hover:bg-white/10">
+                            <AlertDialogCancel className="border-white/30 text-black bg-white">
                               Cancel
                             </AlertDialogCancel>
                             <AlertDialogAction
@@ -756,7 +756,7 @@ export default function Dashboard() {
                               onKeyPress={(e) =>
                                 e.key === "Enter" && handleSearch()
                               }
-                              className="pl-16 pr-4 h-12 bg-white/10 border-white/30 text-white placeholder:text-gray-400 focus:border-blue-500 font-mono uppercase"
+                              className="text-base pl-16 pr-4 h-12 bg-white/10 border-white/30 text-white placeholder:text-gray-400 focus:border-blue-500 font-mono uppercase"
                             />
                             {currentSearchInput && (
                               <Button
