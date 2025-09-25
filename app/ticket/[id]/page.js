@@ -199,7 +199,7 @@ export default function TicketView() {
             <div className="p-6 space-y-6">
               <div className="text-center space-y-2">
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent print:text-black print:bg-none">
-                  RNTU {ticket.event}
+                  {ticket.event}
                 </h1>
                 <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent print:hidden" />
               </div>
@@ -239,7 +239,7 @@ export default function TicketView() {
                       Date
                     </p>
                     <p className="text-base font-semibold text-white print:text-black">
-                      28/06/2025
+                      03/10/2025
                     </p>
                   </div>
                 </div>
@@ -253,7 +253,7 @@ export default function TicketView() {
                       Venue
                     </p>
                     <p className="text-base font-semibold text-white print:text-black">
-                      Courtyard By Marriott Bhopal
+                      Lamdon Villa
                     </p>
                   </div>
                 </div>
