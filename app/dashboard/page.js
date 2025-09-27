@@ -286,7 +286,7 @@ export default function Dashboard() {
   const shareTicket = async (ticket) => {
     const shareData = {
       title: `${ticket.event} Ticket`,
-      text: `Hey ${ticket.name}, Check out your ticket for the RNTU ${ticket.event}!`,
+      text: `Hey ${ticket.name}, Check out your ticket for the ${ticket.event}!`,
       url: `${window.location.origin}/ticket/${ticket.ticketId}`,
     };
 
