@@ -239,7 +239,7 @@ export default function TicketView() {
                       Date
                     </p>
                     <p className="text-base font-semibold text-white print:text-black">
-                      03/10/2025
+                      26/12/2025
                     </p>
                   </div>
                 </div>
@@ -253,7 +253,7 @@ export default function TicketView() {
                       Venue
                     </p>
                     <p className="text-base font-semibold text-white print:text-black">
-                      Lamdon Villa
+                      Courtyard Villa
                     </p>
                   </div>
                 </div>
